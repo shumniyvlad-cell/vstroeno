@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Встроено</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --ink:#24172F; --ink2:#62566D; --ink3:#9A90A3; --line:#E3DEE9; --base:#F4F2F7; --paper:#fff;
+  --l5:#FFB300; --l4:#E2703F; --l3:#A84577; --l2:#6A3C85; --l1:#3A2550;
+  --stop:#D0342C; --ok:#1E8E5A;
+  --display:'Jost',system-ui,sans-serif; --text:'Wix Madefor Text',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--base);color:var(--ink);font:400 15px/1.55 var(--text);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(28px,3.4vw,40px)} h2{font-size:24px} h3{font-size:18px}
+p{margin:0;text-wrap:pretty} a{color:inherit}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--l4);outline-offset:2px;border-radius:4px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink2)} .small{font-size:13px}
+
+/* кнопки и поля */
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:11px 20px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{background:#3A2550} .btn[disabled]{opacity:.55;cursor:default}
+.btn.gold{background:var(--l5);color:var(--ink)} .btn.gold:hover{background:#FFC233}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)} .btn.line:hover{background:var(--base)}
+.btn.quiet{background:transparent;color:var(--ink2);padding:6px 10px;font-weight:500;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.btn.quiet:hover{color:var(--ink);background:transparent;text-decoration-color:var(--ink)}
+.btn.sm{padding:7px 14px;font-size:13px}
+textarea,input[type=text],input[type=number],input[type=date]{width:100%;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);padding:11px 14px;resize:vertical}
+textarea:focus,input:focus{outline:0;border-color:var(--ink)}
+label.f,span.f{display:block;font-size:13px;color:var(--ink2);margin-bottom:6px}
+.field{margin-bottom:16px}
+.err{background:#FDECEA;color:#8A1F17;border-radius:12px;padding:12px 16px;margin:12px 0}
+
+/* каркас кабинета */
+.shell{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100vh}
+.rail{padding:24px 16px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font:600 22px var(--display);text-decoration:none;padding:0 8px}
+.brand svg{flex:none}
+.plist{display:flex;flex-direction:column;gap:2px;flex:1}
+.plist a{display:block;padding:10px 12px;border-radius:12px;text-decoration:none;line-height:1.3}
+.plist a:hover{background:#EAE6EF} .plist a.on{background:var(--paper)}
+.plist b{display:block;font-weight:600} .plist span{font-size:12.5px;color:var(--ink2)}
+main{background:var(--paper);margin:12px 12px 12px 0;border-radius:24px;padding:40px 48px 72px;min-width:0}
+.wrap{max-width:1040px}
+.phead{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:24px}
+.phead .sub{color:var(--ink2);margin-top:8px;max-width:64ch}
+.tag{display:inline-block;background:var(--base);border-radius:999px;padding:3px 11px;font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--line);margin-bottom:32px;overflow-x:auto;scrollbar-width:none}
+.tabs a{padding:10px 16px 12px;text-decoration:none;color:var(--ink2);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+.tabs a:hover{color:var(--ink)} .tabs a.on{color:var(--ink);border-color:var(--l5)}
+.tabs a.off{opacity:.4;pointer-events:none}
+.tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fix{background:var(--base);border-radius:16px;padding:16px;margin:12px 0 24px;display:grid;gap:10px}
+.fix .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.busy{display:flex;align-items:center;gap:10px;background:#FFF4D6;border-radius:12px;padding:10px 16px;margin-bottom:20px;font-weight:500}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--l5);animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.55);opacity:.5}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+section.sec{margin-top:40px} section.sec>h2{margin-bottom:16px}
+
+/* пирамида Киркпатрика—Филлипса */
+.pyr{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
+.pyr .st{display:flex;align-items:center;gap:10px;height:54px;border-radius:7px;color:#fff;padding:0 14px;min-width:0;white-space:nowrap;overflow:hidden}
+.pyr .st b{font:600 22px var(--display)} .pyr .st span{font-weight:600;font-size:14px}
+.pyr .st i{font-style:normal;margin-left:auto;font:600 15px var(--display);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.st.n5{width:38%;background:var(--l5);color:var(--ink)} .st.n4{width:54%;background:var(--l4)} .st.n3{width:70%;background:var(--l3)}
+.st.n2{width:85%;background:var(--l2)} .st.n1{width:100%;background:var(--l1)}
+.pyr.vals .st.n5{width:64%}.pyr.vals .st.n4{width:73%}.pyr.vals .st.n3{width:82%}.pyr.vals .st.n2{width:91%}
+.two{display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:40px;align-items:start}
+.lv{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:16px 0;border-top:1.5px solid var(--line)}
+.lv:first-child{border-top:0;padding-top:0}
+.chip{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;color:#fff;font:600 18px var(--display)}
+.chip.n5{background:var(--l5);color:var(--ink)}.chip.n4{background:var(--l4)}.chip.n3{background:var(--l3)}.chip.n2{background:var(--l2)}.chip.n1{background:var(--l1)}
+.lv h3{font-size:16px;font-family:var(--text);font-weight:600;line-height:1.4;letter-spacing:0}
+.lv dl{margin:8px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;font-size:13.5px}
+.lv dt{color:var(--ink3)} .lv dd{margin:0;color:var(--ink2)}
+.skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.skill{background:var(--base);border-radius:16px;padding:16px 18px} .skill b{display:block;font:600 17px var(--display);margin-bottom:4px}
+ul.plain{margin:0;padding:0;list-style:none;display:grid;gap:8px} ul.plain li{padding-left:18px;position:relative}
+ul.plain li:before{content:"";position:absolute;left:0;top:.62em;width:8px;height:2px;background:var(--ink)}
+
+/* сценарий */
+.sumbar{display:grid;grid-template-columns:auto minmax(0,1fr);gap:32px;align-items:center;background:var(--base);border-radius:20px;padding:22px 26px;margin-bottom:8px}
+.rings{display:flex;gap:22px} .ring{text-align:center;font-size:12.5px;color:var(--ink2)} .ring svg{display:block;margin:0 auto 4px}
+.legend{display:grid;gap:6px;font-size:13.5px}
+.legend div{display:grid;grid-template-columns:14px 7.5em minmax(0,1fr) auto auto;gap:10px;align-items:center}
+.legend u{width:14px;height:14px;border-radius:4px;text-decoration:none}
+.legend .num{text-align:right;min-width:4.2em}
+.c-experience{background:var(--l4)}.c-reflection{background:var(--l3)}.c-theory{background:var(--l2)}.c-practice{background:var(--l5)}
+.day>h2{margin:36px 0 6px}.day>.muted{margin-bottom:18px}
+.slot{display:grid;grid-template-columns:104px minmax(0,1fr);gap:18px;padding:12px 0}
+.slot .t{font:500 15px var(--display);font-variant-numeric:tabular-nums;color:var(--ink2);padding-top:2px}
+.slot.pause{color:var(--ink3);padding:6px 0}.slot.pause .t{color:var(--ink3)}
+.blk{border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.blk>header{padding:16px 20px 14px;background:var(--base)} .blk>header p{color:var(--ink2);margin-top:4px}
+.stg{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:16px 20px;border-top:1.5px solid var(--line)}
+.stg .who{display:grid;grid-template-columns:26px 1fr;gap:10px;align-content:start}
+.stg .who b{display:block;font-weight:600;line-height:1.2} .stg .who span{font-size:12.5px;color:var(--ink2)}
+.stg h4{margin:0 0 4px;font:600 16px var(--text)} .stg p+p{margin-top:6px}
+.stg .lab{color:var(--ink3)} .stg ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px}
+.blk>footer{border-top:1.5px solid var(--line);padding:8px 14px}
+.blk>footer .fix{margin:8px 0}
+
+/* язык */
+.ppl{display:grid;gap:0} .pp{display:grid;grid-template-columns:minmax(140px,220px) 130px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1.5px solid var(--line);align-items:start}
+.pp:first-child{border-top:0}
+.pp q{display:block;quotes:"«" "»";font-weight:500;margin-top:4px}
+.dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 24px}
+.dl .bar{display:flex;flex-direction:column;justify-content:center;padding:12px 16px;color:#fff;margin-bottom:4px;border-radius:7px}
+.dl .bar b{font:600 17px var(--display)} .dl .bar span{font-size:12px;opacity:.85}
+.dl .txt{padding:10px 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;font-size:14px;align-content:start}
+.dl .txt .avoid{grid-column:1/-1;color:var(--ink2)}
+.d-mission{background:#FFB300;color:var(--ink)!important}.d-identity{background:#F08A2B}.d-values{background:#E2703F}.d-capabilities{background:#A84577}.d-behavior{background:#6A3C85}.d-environment{background:#3A2550}
+.zone{grid-column:1/-1;font-size:12.5px;color:var(--ink2);margin:6px 0 8px}
+
+/* табло */
+.kpis{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:18px} .kpi b{display:block;font:600 30px/1 var(--display)} .kpi span{font-size:13px;color:var(--ink2)}
+.brd{border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.br{display:grid;grid-template-columns:minmax(150px,1.1fr) auto 124px auto;gap:16px;align-items:center;padding:11px 18px;border-top:1.5px solid var(--line)}
+.br:first-child{border-top:0} .br.open{background:var(--base)}
+.br .nm{cursor:pointer;min-width:0} .br .nm b{font-weight:600} .br .nm span{display:block;font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cells{display:flex;gap:3px} .cells i{width:13px;height:13px;border-radius:3px;background:var(--base);flex:none}
+.cells i:nth-child(5n){margin-right:6px}
+.cells .done{background:var(--l5)} .cells .redo{background:repeating-linear-gradient(135deg,var(--l4) 0 3px,#fff 3px 5px)}
+.cells .miss{background:#fff;box-shadow:inset 0 0 0 1.5px #CFC8D6} .cells .today{background:#fff;box-shadow:inset 0 0 0 2px var(--ink)}
+.stt{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500}
+.lamp{width:12px;height:12px;border-radius:50%;flex:none}
+.s-ritm .lamp{background:var(--l5)} .s-sag .lamp{background:linear-gradient(90deg,var(--l4) 50%,#fff 50%);box-shadow:inset 0 0 0 1.5px var(--l4)}
+.s-stop .lamp{background:#fff;box-shadow:inset 0 0 0 2.5px var(--stop)} .s-stop{color:var(--stop)} .s-wait .lamp{background:var(--line)}
+.rep{grid-column:1/-1;display:grid;gap:10px;padding:4px 0 8px}
+.rp{background:var(--paper);border-radius:14px;padding:12px 16px;font-size:14px}
+.rp .ai{margin-top:8px;padding-left:12px;border-left:3px solid var(--l5);color:var(--ink2)}
+.weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.wk{background:var(--base);border-radius:18px;padding:16px} .wk h3{margin-bottom:10px} .wk .n{font-size:12.5px;color:var(--ink2)}
+.wk ol{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:d var(--from)}
+.wk li{font-size:13.5px;line-height:1.45;counter-increment:d;padding-left:28px;position:relative}
+.wk li:before{content:counter(d);position:absolute;left:0;top:0;font:600 14px var(--display);color:var(--ink2);font-variant-numeric:tabular-nums}
+.wk li span{display:block;color:var(--ink2);margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.link{display:flex;gap:8px;align-items:center;background:var(--base);border-radius:12px;padding:8px 8px 8px 14px;font-size:13px}
+.link code{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--text);color:var(--ink2)}
+
+/* новый тренинг */
+.intake{max-width:720px} .intake h1{margin-bottom:12px} .intake>.muted{margin-bottom:24px;max-width:60ch}
+.intake textarea.big{min-height:230px;font-size:16px;line-height:1.55;border-radius:18px;padding:18px 20px}
+.recbar{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.rec{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.rec:hover{background:var(--base)}
+.rec:before{content:"";width:10px;height:10px;border-radius:50%;background:var(--stop)}
+.rec.on{background:var(--stop);color:#fff;box-shadow:none} .rec.on:before{background:#fff;border-radius:2px}
+.under{background:var(--base);border-radius:18px;padding:18px 22px;margin-bottom:28px}
+.seg{display:inline-flex;background:var(--base);border-radius:999px;padding:3px}
+.seg label{padding:7px 18px;border-radius:999px;cursor:pointer;font-weight:600}
+.seg input{position:absolute;opacity:0} .seg input:checked+span{background:var(--ink);color:#fff}
+.seg span{display:block;padding:7px 18px;border-radius:999px;margin:-7px -18px}
+.kolbin{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kolbin label{background:var(--base);border-radius:14px;padding:12px;display:grid;gap:6px;border-top:5px solid}
+.kolbin b{font-weight:600} .kolbin span{font-size:12.5px;color:var(--ink2);line-height:1.35;min-height:2.7em}
+.qa{border-top:1.5px solid var(--line);padding:18px 0} .qa b{display:block;font-weight:600;margin-bottom:8px}
+.qa .recbar{margin-top:8px}
+.steps{display:grid;gap:10px;max-width:520px;margin-top:24px}
+.stp{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;background:var(--base);font-weight:600;color:var(--ink3)}
+.stp i{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--line);flex:none}
+.stp.run{color:var(--ink);background:#FFF4D6} .stp.run i{box-shadow:none;background:var(--l5);animation:pulse 1.1s ease-in-out infinite}
+.stp.done{color:var(--ink)} .stp.done i{box-shadow:none;background:var(--ink)} .stp.error{color:var(--stop)} .stp.error i{box-shadow:inset 0 0 0 2px var(--stop)}
+.stp span{font-weight:400;font-size:13px;color:var(--ink2);margin-left:auto}
+
+/* участник и отчёт */
+.solo{max-width:520px;margin:0 auto;padding:20px 16px 64px}
+.solo .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;font-size:13px;color:var(--ink2)}
+.solo .brand{font-size:18px;padding:0}
+.card{background:var(--paper);border-radius:22px;padding:22px}
+.solo h1{font-size:30px;margin-bottom:6px}
+.solo .cells{margin:16px 0 20px;flex-wrap:wrap;row-gap:6px} .solo .cells i{width:18px;height:18px;border-radius:5px;cursor:pointer}
+.solo .cells .future{background:#E9E5EE;cursor:default}
+.solo .cells i.pick{outline:2px solid var(--ink);outline-offset:2px}
+.task{font:500 21px/1.3 var(--display);margin:8px 0 14px;text-wrap:pretty}
+.ask{background:var(--base);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:14.5px}
+.verdict{display:flex;gap:8px;align-items:center;font-weight:600;margin:16px 0 8px}
+.mine{white-space:pre-wrap;color:var(--ink2);font-size:14.5px}
+.aiq{margin-top:12px;padding:12px 16px;background:#FFF4D6;border-radius:14px;font-weight:500}
+.past{margin-top:20px;display:grid;gap:2px} .past button b{white-space:nowrap}.past button{display:grid;grid-template-columns:auto 1fr auto;gap:10px;text-align:left;border:0;background:transparent;padding:12px 6px;border-top:1.5px solid var(--line);cursor:pointer;font-size:14px;align-items:baseline}
+.past button span{color:var(--ink2)}
+.report{max-width:920px;margin:0 auto;padding:40px 24px 72px}
+.report .card{padding:36px 40px} .report h1{margin:10px 0 12px}
+
+@media (max-width:900px){
+  .shell{display:block} .rail{position:static;height:auto;padding:14px 16px 6px;gap:10px}
+  .plist{flex-direction:row;overflow-x:auto;scrollbar-width:none} .plist a{flex:none;max-width:220px}
+  .railtop{display:flex;justify-content:space-between;align-items:center}
+  main{margin:8px;border-radius:20px;padding:24px 18px 56px}
+  .two,.sumbar,.grid2{grid-template-columns:1fr} .weeks{grid-template-columns:1fr 1fr}
+  .slot{grid-template-columns:1fr;gap:4px} .stg{grid-template-columns:1fr;gap:10px}
+  .pp{grid-template-columns:1fr;gap:6px} .dl{grid-template-columns:1fr} .dl .txt{grid-template-columns:1fr}
+  .br{grid-template-columns:1fr auto;row-gap:8px} .br .cells{grid-column:1/-1;order:3}
+  .cells i{width:11px;height:11px} .kolbin{grid-template-columns:1fr 1fr}
+  .legend div{grid-template-columns:14px 6.5em minmax(0,1fr) auto} .legend .ppl-n{display:none}
+  .phead{flex-direction:column;gap:12px} .report .card{padding:22px 18px}
+}
+@media (max-width:520px){.weeks{grid-template-columns:1fr}.rings{gap:10px}}
+@media print{
+  body{background:#fff} .rail,.tabs,.tools,.fix,.blk>footer,.busy,.noprint{display:none!important}
+  .shell{display:block} main{margin:0;padding:0;border-radius:0} .blk,.slot{break-inside:avoid}
+  .report{padding:0}.report .card{padding:0}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>window.VSTROENO_STATIC = 1;</script>
+<script>
+'use strict';
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// типограф: короткие слова и предлоги не висят в конце строки, тире не уезжает в начало
+const SHORT = /(^|[\s(«„])((?:[А-Яа-яЁёA-Za-z]{1,2}|для|без|что|как|или|при|над|под|про|это|его|нет|уже|ещё|чем|где|кто|она|они|вам|вас|чтобы|если|когда)) (?=\S)/g;
+const ty = s => esc(s).replace(SHORT, '$1$2 ').replace(SHORT, '$1$2 ').replace(/ — /g, ' — ').replace(/(\d) (мин|час|дн|%|₽|чел|раз)/g, '$1 $2');
+const cap = s => { s = String(s ?? '').trim(); return s ? s[0].toUpperCase() + s.slice(1) : s; };
+const tc = s => ty(cap(s));
+const num = s => { const n = parseFloat(String(s ?? '').replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : null; };
+const fmt = n => n == null ? '' : Number(n).toLocaleString('ru-RU', {maximumFractionDigits: 1});
+const hm = m => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + ' ч ' : '') + (r ? r + ' мин' : '') || '0 мин'; };
+const clock = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+const plural = (n, a, b, c) => { const d = n % 10, t = n % 100; return d === 1 && t !== 11 ? a : d >= 2 && d <= 4 && (t < 12 || t > 14) ? b : c; };
+
+const STAGE = {
+  experience: {name: 'Опыт', style: 'активисты', hint: 'учатся в деле, им нужна проба', q: 0},
+  reflection: {name: 'Разбор', style: 'мыслители', hint: 'наблюдают и обдумывают', q: 1},
+  theory: {name: 'Теория', style: 'теоретики', hint: 'хотят модель и логику', q: 2},
+  practice: {name: 'Практика', style: 'прагматики', hint: 'спрашивают, как применить завтра', q: 3},
+};
+const STYLE_KEY = {experience: 'activist', reflection: 'reflector', theory: 'theorist', practice: 'pragmatist'};
+const STAGE_COLOR = {experience: 'var(--l4)', reflection: 'var(--l3)', theory: 'var(--l2)', practice: 'var(--l5)'};
+const LEVEL = {5: 'Окупаемость', 4: 'Результат', 3: 'Поведение', 2: 'Знания', 1: 'Реакция'};
+const DILTS = {
+  mission: ['Миссия', 'ради чего'], identity: ['Идентичность', 'кто я здесь'], values: ['Ценности', 'почему это важно'],
+  capabilities: ['Способности', 'как я это делаю'], behavior: ['Поведение', 'что я делаю'], environment: ['Окружение', 'где, когда, с кем'],
+};
+const SECTION = {goals: 'Замысел', program: 'Сценарий', language: 'Язык', plan: 'Закрепление'};
+const STATUS = {ritm: 'В ритме', sag: 'Проседает', stop: 'Остановился', wait: 'Ещё не начал'};
+const TABS = [['scenario', 'Сценарий', 'program'], ['goals', 'Замысел', 'goals'], ['language', 'Язык', 'language'], ['practice', 'Закрепление', 'plan'], ['result', 'Результат', 'goals']];
+
+const S = {projects: [], profile: {}, p: null, view: null, err: '', draft: '', timer: 0};
+const U = {fix: null, block: null, row: null, pick: null, sending: false, rec: null};
+
+const STATIC = !!window.VSTROENO_STATIC;  // версия для просмотра на GitHub Pages: данные из готовых файлов, ИИ выключен
+const STATIC_MSG = 'Это версия для просмотра: здесь два готовых примера. Новые сценарии, правки и ответы контролёра работают в рабочей версии на сервере.';
+async function api(path, body, method) {
+  if (STATIC) {
+    if (body !== undefined || method) throw new Error(STATIC_MSG);
+    const r = await fetch('static/' + path.replace(/\//g, '-') + '.json');
+    if (!r.ok) throw new Error('Не найдено');
+    return r.json();
+  }
+  const r = await fetch('api/' + path, body === undefined && !method ? undefined :
+    {method: method || 'POST', headers: {'Content-Type': 'application/json'}, body: body === undefined ? undefined : JSON.stringify(body)});
+  const j = await r.json().catch(() => ({error: 'Сервер не ответил. Обновите страницу.'}));
+  if (!r.ok) throw new Error(j.error || 'Что-то пошло не так');
+  return j;
+}
+const route = () => (location.hash.replace(/^#\/?/, '') || '').split('/').map(decodeURIComponent);
+const go = h => { location.hash = h; };
+const brandMark = `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="9" y="2" width="8" height="6" rx="1.5" fill="#FFB300"/><rect x="5" y="10" width="16" height="6" rx="1.5" fill="#A84577"/><rect x="1" y="18" width="24" height="6" rx="1.5" fill="#3A2550"/></svg>`;
+
+// ───────── графика ─────────
+function ring(parts, label) {
+  const total = parts.reduce((a, p) => a + p.v, 0), R = 34, C = 2 * Math.PI * R;
+  let off = 0, arcs = '';
+  if (total) for (const p of parts) {
+    const len = C * p.v / total;
+    if (len > 0.5) arcs += `<circle cx="46" cy="46" r="${R}" fill="none" stroke="${p.c}" stroke-width="15" stroke-dasharray="${Math.max(len - 2, 0.1)} ${C}" stroke-dashoffset="${-off}"/>`;
+    off += len;
+  }
+  else arcs = `<circle cx="46" cy="46" r="${R}" fill="none" stroke="var(--line)" stroke-width="15" stroke-dasharray="3 5"/>`;
+  return `<div class="ring"><svg width="92" height="92" viewBox="0 0 92 92" role="img" aria-label="${esc(label)}"><g transform="rotate(-90 46 46)">${arcs}</g></svg>${esc(label)}</div>`;
+}
+function quad(stage) {
+  const d = ['M11 11V1A10 10 0 0 1 21 11Z', 'M11 11H21A10 10 0 0 1 11 21Z', 'M11 11V21A10 10 0 0 1 1 11Z', 'M11 11H1A10 10 0 0 1 11 1Z'][STAGE[stage].q];
+  return `<svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="${d}" fill="${STAGE_COLOR[stage]}"/></svg>`;
+}
+function pyramid(vals) {
+  return `<div class="pyr${vals ? ' vals' : ''}">` + [5, 4, 3, 2, 1].map(n =>
+    `<div class="st n${n}"><b>${n}</b><span>${LEVEL[n]}</span>${vals ? `<i>${vals[n] || ''}</i>` : ''}</div>`).join('') + '</div>';
+}
+function cells(row, pick) {
+  return '<div class="cells">' + row.map((c, i) => `<i class="${c}${pick === i + 1 ? ' pick' : ''}" data-act="pick" data-d="${i + 1}" title="День ${i + 1}"></i>`).join('') + '</div>';
+}
+function levelValues(m, b) {
+  m = m || {};
+  const cost = num(m.cost), ben = num(m.benefit), v = {};
+  v[5] = cost && ben != null ? (ben - cost >= 0 ? '+' : '−') + fmt(Math.abs(Math.round((ben - cost) / cost * 100))) + '%' : 'на 21-й день';
+  v[4] = num(m.base) != null && num(m.now) != null ? `${fmt(num(m.base))} → ${fmt(num(m.now))}${m.unit ? ' ' + esc(m.unit) : ''}` : '—';
+  v[3] = b && b.pct != null ? `${b.pct}% заданий` : '—';
+  v[2] = num(m.test_before) != null && num(m.test_after) != null ? `${fmt(num(m.test_before))}% → ${fmt(num(m.test_after))}%` : '—';
+  v[1] = num(m.reaction) != null ? `${fmt(num(m.reaction))} из 10` : '—';
+  return v;
+}
+
+// ───────── кабинет тренера ─────────
+function shell(inner, curId) {
+  const list = S.projects.map(p => `<a href="#/t/${p.id}" class="${p.id === curId ? 'on' : ''}"><b>${ty(p.title || 'Новый тренинг')}</b><span>${
+    p.stage === 'interview' ? 'разбираю запрос' : p.stage === 'questions' ? 'ждёт ваших ответов' : p.state === 'running' ? 'собирается' : p.demo ? 'демо-пример' : (p.people ? p.people + ' ' + plural(p.people, 'участник', 'участника', 'участников') : 'сценарий готов')}</span></a>`).join('');
+  return `<div class="shell"><aside class="rail"><div class="railtop"><a class="brand" href="#/">${brandMark}Встроено</a></div>
+    <a class="btn gold" href="#/new">Новый тренинг</a><nav class="plist" aria-label="Тренинги">${list}</nav>
+    <a class="btn quiet" href="#/me">Мой почерк</a></aside><main><div class="wrap">${STATIC ? '<div class="busy noprint" style="background:var(--base);font-weight:400">Версия для просмотра: два готовых примера. Новые сценарии и ИИ-контролёр работают в рабочей версии.</div>' : ''}${inner}</div></main></div>`;
+}
+const errBox = () => S.err ? `<div class="err" role="alert">${ty(S.err)}</div>` : '';
+const recBtn = target => `<button class="btn rec sm" data-act="rec" data-target="${target}" type="button">Наговорить</button>`;
+
+function viewNew() {
+  return shell(`<div class="intake"><h1>Расскажите про запрос</h1>
+    <p class="muted">Как рассказали бы коллеге: что за компания, кто придёт на тренинг, чего хочет заказчик, на сколько дней. Голосом или текстом. Дальше я задам несколько вопросов и соберу сценарий.</p>
+    ${errBox()}<textarea class="big" id="story" placeholder="Например: производственная компания, 14 начальников участков. Задачи ставят на бегу, контроль только в конце смены. Заказчик хочет, чтобы сменные задания выполнялись в срок. Один день, офлайн…">${esc(S.draft)}</textarea>
+    <div class="recbar">${recBtn('story')}<button class="btn" data-act="create">Дальше</button></div></div>`);
+}
+function viewMe() {
+  return shell(`<div class="intake"><h1>Мой почерк</h1>
+    <p class="muted">Ваши авторские приёмы и правила. Они подмешиваются в каждый сценарий: что вы всегда делаете на открытии, какие упражнения любите, чего в ваших тренингах не бывает.</p>
+    ${errBox()}<div class="field"><label class="f" for="pname">Как вас зовут</label><input type="text" id="pname" value="${esc(S.profile.name)}"></div>
+    <div class="field"><label class="f" for="pnotes">Приёмы и правила</label><textarea id="pnotes" style="min-height:260px" placeholder="Например: начинаю с вопроса про последний провал на работе. Теорию даю после упражнения, не раньше. Никаких ролевых игр про абстрактные компании — только их собственные ситуации.">${esc(S.profile.notes)}</textarea>
+    <div class="recbar">${recBtn('pnotes')}<button class="btn" data-act="profile">Сохранить</button>${S.saved ? '<span class="muted small">Сохранено</span>' : ''}</div></div></div>`);
+}
+function viewQuestions(p) {
+  const b = p.brief, k = b.kolb || {};
+  const f = (id, label, v, ph) => `<div class="field"><label class="f" for="b_${id}">${label}</label><input type="text" id="b_${id}" value="${esc(v)}" placeholder="${esc(ph || '')}"></div>`;
+  return `<div class="intake"><h1>Уточню несколько вещей</h1>
+    <div class="under" style="margin-top:20px"><p class="small muted" style="margin-bottom:4px">Понял запрос так</p><p>${ty(p.understood)}</p></div>${errBox()}
+    ${f('title', 'Название тренинга', b.title)}${f('company', 'Компания', b.company)}${f('audience', 'Участники', b.audience)}${f('result', 'Какой результат нужен бизнесу', b.result)}
+    <div class="field"><span class="f">Сколько дней</span><div class="seg" role="radiogroup">${[1, 2].map(n => `<label><input type="radio" name="days" value="${n}" ${+b.days === n ? 'checked' : ''}><span>${n} ${n === 1 ? 'день' : 'дня'}</span></label>`).join('')}</div></div>
+    <div class="field"><span class="f">Состав группы по Колбу, человек. Не знаете — оставьте нули, время разделю поровну</span><div class="kolbin">${Object.keys(STAGE).map(s =>
+      `<label style="border-color:${STAGE_COLOR[s]}"><b>${STAGE[s].style[0].toUpperCase() + STAGE[s].style.slice(1)}</b><span>${STAGE[s].hint}</span><input type="number" min="0" max="200" id="k_${STYLE_KEY[s]}" value="${+k[STYLE_KEY[s]] || 0}"></label>`).join('')}</div></div>
+    <h2 style="margin:32px 0 6px">Вопросы</h2><p class="muted" style="margin-bottom:8px">Отвечайте коротко, можно голосом. Пустые ответы пропущу.</p>
+    ${(p.qa || []).map(q => `<div class="qa"><b>${ty(q.q)}</b><textarea id="a_${q.id}" rows="2" placeholder="${esc(q.hint)}">${esc(q.a)}</textarea><div class="recbar">${recBtn('a_' + q.id)}</div></div>`).join('')}
+    <div class="recbar" style="margin-top:20px"><button class="btn gold" data-act="build">Собрать сценарий</button></div></div>`;
+}
+function viewProgress(p) {
+  const st = p.gen.steps, note = {goals: 'цели от денег к реакции', program: 'упражнения, разбор, теория, практика', language: 'с кем как говорить', plan: '20 рабочих дней после тренинга'};
+  return `<h1>Собираю «${ty(p.brief.title)}»</h1><p class="muted" style="margin-top:10px">Обычно это три-четыре минуты. Страницу можно не закрывать.</p>
+    <div class="steps">${Object.keys(SECTION).map(s => `<div class="stp ${st[s]}"><i></i>${SECTION[s]}<span>${note[s]}</span></div>`).join('')}</div>${p.gen.error ? `<div class="err">${ty(p.gen.error)}</div>` : ''}`;
+}
+function fixBox(section, label) {
+  return U.fix !== section ? '' : `<div class="fix"><label class="f" for="fixtxt" style="margin:0">Что поправить: ${label}</label><textarea id="fixtxt" rows="3" placeholder="Например: меньше теории, больше работы в парах; второй блок построить на передаче смены"></textarea>
+    <div class="row">${recBtn('fixtxt')}<button class="btn sm" data-act="regen" data-section="${section}">Пересобрать</button><button class="btn quiet sm" data-act="fix" data-section="">Отмена</button></div></div>`;
+}
+
+function programStats(p) {
+  const by = {experience: 0, reflection: 0, theory: 0, practice: 0};
+  let total = 0, blocks = 0;
+  for (const d of p.program.days) {
+    total += d.open.minutes + d.close.minutes;
+    for (const b of d.blocks) { blocks++; for (const s of b.stages) { by[s.stage] += s.minutes; total += s.minutes; } }
+  }
+  return {by, total, blocks, staged: Object.values(by).reduce((a, b) => a + b, 0)};
+}
+function tabScenario(p) {
+  const st = programStats(p), k = p.brief.kolb || {}, people = Object.values(k).reduce((a, b) => a + (+b || 0), 0), nd = p.program.days.length;
+  const skill = id => (p.goals.skills.find(s => s.id === id) || {}).name || '';
+  let h = `<div class="phead" style="margin-bottom:16px"><h2>${nd} ${plural(nd, 'день', 'дня', 'дней')}, ${st.blocks} ${plural(st.blocks, 'блок', 'блока', 'блоков')}, ${hm(st.total)} работы</h2>
+    <div class="tools"><button class="btn line sm" data-act="word">Скачать для Word</button><button class="btn line sm" data-act="print">Печать</button><button class="btn sm" data-act="fix" data-section="program">Поправить сценарий</button></div></div>
+    ${fixBox('program', 'весь сценарий')}
+    <div class="sumbar"><div class="rings">${ring(Object.keys(STAGE).map(s => ({v: +k[STYLE_KEY[s]] || 0, c: STAGE_COLOR[s]})), people ? 'Группа' : 'Группа не задана')}${ring(Object.keys(STAGE).map(s => ({v: st.by[s], c: STAGE_COLOR[s]})), 'Время')}</div>
+    <div class="legend">${Object.keys(STAGE).map(s => `<div><u class="c-${s}"></u><b>${STAGE[s].name}</b><span class="muted">${STAGE[s].style}${people ? ', ' + (+k[STYLE_KEY[s]] || 0) + ' чел.' : ''}</span><span class="num ppl-n muted">${Math.round(100 * st.by[s] / (st.staged || 1))}%</span><span class="num">${st.by[s]} мин</span></div>`).join('')}</div></div>`;
+  p.program.days.forEach((d, di) => {
+    let t = 10 * 60;
+    const slot = (min, body, cls) => { const r = `<div class="slot ${cls || ''}"><div class="t">${clock(t)}–${clock(t + min)}</div><div>${body}</div></div>`; t += min; return r; };
+    h += `<div class="day"><h2>День ${d.day}. ${tc(d.theme)}</h2><p class="muted">Начало в 10:00, перерывы расставлены автоматически.</p>`;
+    h += slot(d.open.minutes, `<b>${ty(d.open.title || 'Открытие')}</b><p class="muted">${ty(d.open.text)}</p>`);
+    d.blocks.forEach((b, bi) => {
+      const busy = p.gen.busy && p.gen.busy[0] === di && p.gen.busy[1] === bi, open = U.block === di + ':' + bi;
+      let bt = t;
+      const stages = b.stages.map(s => { const r = `<div class="stg"><div class="who">${quad(s.stage)}<div><b>${STAGE[s.stage].name}</b><span>${clock(bt)}, ${s.minutes} мин<br>${STAGE[s.stage].style}</span></div></div>
+        <div><h4>${tc(s.title)}</h4>${s.group ? `<p>${tc(s.group)}</p>` : ''}${s.theory && s.theory.length ? `<ol>${s.theory.map(x => `<li>${ty(x)}</li>`).join('')}</ol>` : ''}
+        ${s.trainer ? `<p><span class="lab">Тренер.</span> ${ty(s.trainer)}</p>` : ''}${s.materials ? `<p class="small"><span class="lab">Подготовить.</span> ${ty(s.materials)}</p>` : ''}</div></div>`; bt += s.minutes; return r; }).join('');
+      h += slot(b.minutes, `<article class="blk"><header><h3>${tc(b.title)}</h3><p>${tc(b.goal)}</p>${skill(b.skill) ? `<p class="small">Навык: ${ty(skill(b.skill))}</p>` : ''}</header>${stages}
+        <footer>${busy ? '<div class="busy" style="margin:6px 0"><span class="dot"></span>Дорабатываю блок</div>' : open ? `<div class="fix"><label class="f" for="blktxt" style="margin:0">Что поправить в этом блоке</label><textarea id="blktxt" rows="2" placeholder="Например: упражнение на опыт заменить на разбор их реальной планёрки"></textarea><div class="row">${recBtn('blktxt')}<button class="btn sm" data-act="block-send" data-d="${di}" data-b="${bi}">Доработать</button><button class="btn quiet sm" data-act="block" data-k="">Отмена</button></div></div>` : `<button class="btn quiet sm" data-act="block" data-k="${di}:${bi}">Доработать блок</button>`}</footer></article>`);
+      const last = bi === d.blocks.length - 1;
+      if (!last) h += bi === 1 ? slot(60, 'Обед', 'pause') : slot(15, 'Кофе', 'pause');
+    });
+    h += slot(d.close.minutes, `<b>${ty(d.close.title || 'Закрытие')}</b><p class="muted">${ty(d.close.text)}</p>`) + '</div>';
+  });
+  return h;
+}
+function tabGoals(p) {
+  const g = p.goals;
+  return `<div class="phead" style="margin-bottom:20px"><p style="font:500 20px/1.35 var(--display);max-width:44ch">${ty(g.summary)}</p><div class="tools"><button class="btn sm" data-act="fix" data-section="goals">Поправить замысел</button></div></div>${fixBox('goals', 'цели, навыки, план блоков')}
+    <div class="two"><div><p class="muted small" style="margin-bottom:12px">Тренинг проектируется сверху вниз: от денег к реакции. Меряется снизу вверх.</p>${pyramid()}</div>
+    <div>${g.levels.map(l => `<div class="lv"><div class="chip n${l.n}">${l.n}</div><div><h3>${tc(l.goal)}</h3><dl><dt>Меряем</dt><dd>${tc(l.metric)}</dd><dt>Как</dt><dd>${ty(l.how)}</dd><dt>Когда</dt><dd>${ty(l.when)}</dd></dl></div></div>`).join('')}</div></div>
+    <section class="sec"><h2>Навыки, которые должны появиться в работе</h2><div class="skills">${g.skills.map(s => `<div class="skill"><b>${ty(s.name)}</b>${ty(s.behavior)}</div>`).join('')}</div></section>
+    <section class="sec"><h2>Что помешает переносу в работу</h2><ul class="plain">${g.risks.map(r => `<li>${ty(r)}</li>`).join('')}</ul></section>
+    ${(p.qa || []).some(q => q.a) ? `<section class="sec"><h2>Ваши уточнения</h2>${p.qa.filter(q => q.a).map(q => `<div class="lv" style="grid-template-columns:1fr"><div><p class="muted small">${ty(q.q)}</p><p>${ty(q.a)}</p></div></div>`).join('')}</section>` : ''}`;
+}
+function tabLanguage(p) {
+  const L = p.language, keys = Object.keys(DILTS);
+  const lv = k => L.levels.find(x => x.key === k) || {questions: [], phrases: []};
+  return `<div class="phead" style="margin-bottom:8px"><h2>С кем на каком уровне говорить</h2><div class="tools"><button class="btn sm" data-act="fix" data-section="language">Поправить язык</button></div></div>${fixBox('language', 'роли и формулировки')}
+    <div class="ppl">${L.people.map(x => `<div class="pp"><b>${ty(x.who)}</b><span><span class="tag ${'d-' + x.level}" style="color:#fff">${(DILTS[x.level] || [x.level])[0]}</span></span><div><span class="muted">${ty(x.why)}</span><q>${ty(x.opener)}</q></div></div>`).join('')}</div>
+    <section class="sec"><h2>Формулировки по уровням Дилтса</h2><div class="dl">
+    ${keys.map((k, i) => `${i === 0 ? '<p class="zone">Верхние три уровня — про смысл и ценности. Здесь говорят эмоционально, образами.</p>' : i === 3 ? '<p class="zone">Нижние три — про дело. Здесь работают рациональные вопросы и факты.</p>' : ''}
+      <div class="bar d-${k}"><b>${DILTS[k][0]}</b><span>${DILTS[k][1]}</span></div><div class="txt"><ul class="plain">${lv(k).questions.map(q => `<li>${ty(q)}</li>`).join('')}</ul><ul class="plain">${lv(k).phrases.map(q => `<li>${ty(q)}</li>`).join('')}</ul>${lv(k).avoid ? `<p class="avoid small">Не говорить: ${ty(lv(k).avoid)}</p>` : ''}</div>`).join('')}</div></section>`;
+}
+function boardRows(p, b, withLinks) {
+  const base = location.href.split('#')[0];
+  return `<div class="brd">${b.rows.map(r => {
+    const m = withLinks && p.people.find(x => x.id === r.id), open = withLinks && U.row === r.id;
+    const reps = open ? Object.entries(m.checkins || {}).sort((a, c) => c[0] - a[0]).slice(0, 3) : [];
+    return `<div class="br${open ? ' open' : ''}"><div class="nm" ${withLinks ? `data-act="row" data-id="${r.id}" role="button" tabindex="0"` : ''}><b>${ty(r.name)}</b><span>${ty(r.role)}</span></div>${cells(r.cells)}
+      <div class="stt s-${r.status}"><span class="lamp"></span>${STATUS[r.status]}</div>${withLinks ? `<button class="btn quiet sm" data-act="copy" data-url="${esc(base + '#/p/' + p.id + '/' + r.id)}">Ссылка</button>` : '<span></span>'}
+      ${open ? `<div class="rep">${reps.length ? reps.map(([d, c]) => `<div class="rp"><b>День ${d}${c.ok ? '' : ', не зачтено'}.</b> ${ty(c.text)}${c.reply ? `<div class="ai">${ty(c.reply)} ${ty(c.question)}</div>` : ''}</div>`).join('') : '<p class="muted small">Отчётов пока нет.</p>'}
+        <div class="row" style="display:flex;gap:8px"><a class="btn line sm" href="#/p/${p.id}/${r.id}" target="_blank" rel="noopener">Открыть экран участника</a>${p.demo ? '' : `<button class="btn quiet sm" data-act="person-remove" data-id="${r.id}">Убрать из группы</button>`}</div></div>` : ''}</div>`;
+  }).join('')}</div>`;
+}
+function tabPractice(p) {
+  const pl = p.plan, b = p.board;
+  let h = `<div class="phead" style="margin-bottom:8px"><div><h2>Контролёр навыка: 20 рабочих дней после тренинга</h2><p class="sub">Каждый день участник делает одно задание в работе и пишет отчёт. ИИ-контролёр проверяет, что навык применён, и задаёт вопрос на следующий шаг.</p><p class="sub"><b>Когда задание зачтено.</b> ${tc(pl.criteria)}</p></div>
+    <div class="tools"><button class="btn sm" data-act="fix" data-section="plan">Поправить план</button></div></div>${fixBox('plan', 'задания, недели, роль руководителя')}`;
+  if (b.rows.length) {
+    h += `<section class="sec" style="margin-top:24px"><div class="kpis"><div class="kpi"><b class="num">${b.day || '—'}<span style="font:inherit;color:var(--ink3)"> из 20</span></b><span>${b.day ? 'день закрепления' : 'старт ещё не назначен'}</span></div>
+      <div class="kpi"><b class="num">${b.pct == null ? '—' : b.pct + '%'}</b><span>заданий выполнено</span></div><div class="kpi"><b class="num">${b.ritm}</b><span>в ритме</span></div><div class="kpi"><b class="num">${b.sag}</b><span>проседают</span></div><div class="kpi"><b class="num" style="color:${b.stop ? 'var(--stop)' : 'inherit'}">${b.stop}</b><span>остановились</span></div></div>
+      ${boardRows(p, b, true)}<p class="muted small" style="margin-top:10px">Нажмите на имя, чтобы прочитать последние отчёты. «Ссылка» копирует личный адрес участника: по нему он отчитывается с телефона, без пароля.</p></section>`;
+  }
+  h += `<section class="sec noprint"><h2>${b.rows.length ? 'Добавить участников' : 'Запустить закрепление'}</h2><div class="grid2"><div><label class="f" for="names">По одному в строке: имя, должность</label><textarea id="names" rows="4" placeholder="Ирина Соколова, начальник участка №3"></textarea><div class="recbar"><button class="btn sm" data-act="people">Добавить в группу</button></div></div>
+    <div>${p.demo ? '<p class="muted">В демо-примере группа всегда на 12-м дне, чтобы было что показать.</p>' : `<label class="f" for="start">Первый день закрепления</label><input type="date" id="start" value="${esc(p.start || '')}"><div class="recbar"><button class="btn sm" data-act="start">Назначить</button></div>`}</div></div></section>`;
+  h += `<section class="sec"><h2>План на четыре недели</h2><div class="weeks">${pl.weeks.map((w, i) => `<div class="wk"><p class="n">Неделя ${w.n}</p><h3>${tc(w.focus)}</h3><ol style="--from:${i * 5}">${w.days.map(d => `<li>${tc(d.task)}<span>Отчёт. ${tc(d.report)}</span></li>`).join('')}</ol></div>`).join('')}</div></section>
+    <section class="sec"><div class="grid2"><div><h2 style="margin-bottom:14px">Что делает руководитель участника</h2><ul class="plain">${pl.manager.map(x => `<li>${ty(x)}</li>`).join('')}</ul></div><div><h2 style="margin-bottom:14px">День 21</h2><p>${ty(pl.final)}</p></div></div></section>`;
+  return h;
+}
+function tabResult(p) {
+  const m = p.metrics || {}, g = p.goals, url = location.href.split('#')[0] + '#/r/' + p.id;
+  const l4 = g.levels.find(l => +l.n === 4) || {};
+  const f = (id, label, ph, w) => `<div class="field" style="${w || ''}"><label class="f" for="m_${id}">${label}</label><input type="text" inputmode="decimal" id="m_${id}" value="${esc(m[id])}" placeholder="${ph || ''}"></div>`;
+  return `<div class="two"><div><h2 style="margin-bottom:6px">Что принёс тренинг</h2><p class="muted small" style="margin-bottom:16px">Третий уровень считается сам — по отчётам участников. Остальное вносите по мере замеров.</p>${pyramid(levelValues(m, p.board))}
+    <div class="link" style="margin-top:18px"><code>${esc(url)}</code><button class="btn sm" data-act="copy" data-url="${esc(url)}">Ссылка заказчику</button></div><p class="muted small" style="margin-top:8px">По ссылке заказчик видит эту пирамиду и табло группы. Тексты отчётов ему не показываются.</p></div>
+    <div><div class="grid2">${f('reaction', '1. Оценка тренинга участниками, из 10', '8,6')}<span></span>${f('test_before', '2. Тест до тренинга, %', '48')}${f('test_after', '2. Тест после, %', '84')}</div>
+    <div class="field"><label class="f" for="m_metric">4. Показатель бизнеса</label><input type="text" id="m_metric" value="${esc(m.metric || l4.metric || '')}"></div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr 1fr 1fr">${f('base', 'Было', '')}${f('now', 'Стало', '')}${f('target', 'Цель', '')}<div class="field"><label class="f" for="m_unit">Единица</label><input type="text" id="m_unit" value="${esc(m.unit)}" placeholder="%"></div></div>
+    <div class="grid2">${f('cost', '5. Затраты на обучение, ₽', 'тренинг, время людей, площадка')}${f('benefit', '5. Выгода в деньгах, ₽', 'эффект от показателя за период')}</div>
+    <p class="muted small" style="margin-bottom:16px">Окупаемость = (выгода − затраты) ÷ затраты × 100%.</p><button class="btn" data-act="metrics">Сохранить замеры</button>${S.saved ? ' <span class="muted small">Сохранено</span>' : ''}</div></div>`;
+}
+function viewProject(p, tab) {
+  if (p.stage === 'interview') return shell(`<h1>Разбираю запрос</h1><div class="busy" style="margin-top:20px;max-width:420px"><span class="dot"></span>Читаю и готовлю вопросы, около минуты</div>`, p.id);
+  if (p.stage === 'error') return shell(`<h1>Не получилось разобрать запрос</h1><div class="err">${ty(p.stage_error)}</div><button class="btn" data-act="reinterview">Разобрать ещё раз</button> <button class="btn quiet" data-act="delete">Удалить</button>`, p.id);
+  if (p.stage === 'questions') return shell(viewQuestions(p), p.id);
+  const ready = k => !!p[k];
+  if (!ready('goals') || (p.gen.state === 'running' && !ready('program') && !U.seen)) {
+    if (p.gen.state !== 'running' && !ready('goals')) return shell(`<h1>Сценарий не собрался</h1><div class="err">${ty(p.gen.error || 'Попробуйте ещё раз')}</div><button class="btn" data-act="regen" data-section="goals">Собрать заново</button> <button class="btn quiet" data-act="delete">Удалить</button>`, p.id);
+    return shell(viewProgress(p), p.id);
+  }
+  const t = TABS.find(x => x[0] === tab && ready(x[2])) || TABS.find(x => ready(x[2]));
+  const running = p.gen.state === 'running' && !p.gen.busy ? Object.keys(SECTION).filter(s => ['run', 'wait'].includes(p.gen.steps[s])).map(s => SECTION[s]).join(', ') : '';
+  const missing = p.gen.state !== 'running' ? Object.keys(SECTION).filter(s => p.gen.steps[s] === 'error') : [];
+  const body = {scenario: tabScenario, goals: tabGoals, language: tabLanguage, practice: tabPractice, result: tabResult}[t[0]](p);
+  return shell(`<header class="phead"><div><h1>${ty(p.brief.title)}</h1><p class="sub">${ty(p.brief.company)}${p.brief.audience ? '. ' + ty(p.brief.audience) : ''}</p></div>
+    <div class="tools">${p.demo ? '<span class="tag">Демо-пример, данные условные</span>' : '<button class="btn quiet sm" data-act="delete">Удалить</button>'}</div></header>
+    <nav class="tabs">${TABS.map(x => `<a href="#/t/${p.id}/${x[0]}" class="${x === t ? 'on' : ''}${ready(x[2]) ? '' : ' off'}">${x[1]}</a>`).join('')}</nav>
+    ${running ? `<div class="busy"><span class="dot"></span>Пересобираю: ${running}</div>` : ''}${missing.length ? `<div class="err">Не собралось: ${missing.map(s => SECTION[s]).join(', ')}. ${ty(p.gen.error)} ${missing.map(s => `<button class="btn sm" data-act="regen" data-section="${s}">Собрать «${SECTION[s]}»</button>`).join(' ')}</div>` : p.gen.error && p.gen.state !== 'running' ? `<div class="err">${ty(p.gen.error)}</div>` : ''}${errBox()}
+    <section class="tab">${body}</section>`, p.id);
+}
+
+// ───────── экран участника ─────────
+function viewMember(v) {
+  const top = `<div class="top"><span class="brand">${brandMark}Встроено</span></div><p class="muted small" style="margin-bottom:6px">${ty(v.title)}</p>`;
+  if (!v.tasks.length) return `<div class="solo">${top}<div class="card"><h1>${ty(v.name.split(' ')[0])}, план ещё готовится</h1><p class="muted">Тренер пришлёт сообщение, когда задания появятся.</p></div></div>`;
+  if (!v.day) return `<div class="solo">${top}<div class="card"><h1>${ty(v.name.split(' ')[0])}, скоро начнём</h1><p class="muted">Закрепление стартует после тренинга: 20 рабочих дней, одно короткое задание в день. Эта ссылка личная, сохраните её.</p></div></div>`;
+  const d = U.pick && U.pick <= v.day ? U.pick : v.day, t = v.tasks[d - 1], c = v.checkins[d];
+  const form = `<div class="ask">${tc(t.report)}</div>${errBox()}<textarea id="report" rows="5" placeholder="Что сделали, с кем, что получилось">${esc(U.draft || '')}</textarea>
+    <div class="recbar">${recBtn('report')}<button class="btn gold" data-act="checkin" data-d="${d}" ${U.sending ? 'disabled' : ''}>${U.sending ? 'Контролёр читает…' : 'Отправить отчёт'}</button></div>`;
+  const done = c ? `<div class="verdict">${c.ok ? '<span class="lamp" style="background:var(--l5)"></span>Зачтено' : '<span class="lamp" style="box-shadow:inset 0 0 0 2.5px var(--l4)"></span>Пока не зачтено'}</div><p class="mine">${esc(c.text)}</p>
+    ${c.reply ? `<div class="rp" style="background:var(--base);margin-top:12px">${ty(c.reply)}</div>` : ''}${c.question ? `<div class="aiq">${ty(c.question)}</div>` : ''}${c.ok ? '' : `<p class="muted small" style="margin:16px 0 8px">Допишите отчёт, и я посмотрю ещё раз.</p>${form}`}` : form;
+  const past = v.tasks.slice(0, v.day).map((x, i) => ({x, n: i + 1})).filter(o => o.n !== d).reverse();
+  return `<div class="solo">${top}<h1>${ty(v.name.split(' ')[0])}, день ${v.day} из ${v.total}</h1>
+    <p class="muted">${v.streak > 1 ? `${v.streak} ${plural(v.streak, 'день', 'дня', 'дней')} подряд без пропусков. ` : ''}Выполнено ${v.done} из ${v.cells[v.day - 1] === 'done' ? v.day : v.day - 1}${v.cells[v.day - 1] === 'done' ? '' : ', сегодняшнее задание ждёт'}.</p>${cells(v.cells, d)}
+    <div class="card"><p class="small muted">${d === v.day ? 'Сегодня' : 'День ' + d}, неделя ${t.week}. ${tc(t.focus)}</p><p class="task">${tc(t.task)}</p>${done}</div>
+    ${past.length ? `<div class="past">${past.map(o => { const k = v.checkins[o.n]; return `<button data-act="pick" data-d="${o.n}"><b class="num">День ${o.n}</b><span>${tc(o.x.task.length > 70 ? o.x.task.slice(0, 68) + '…' : o.x.task)}</span><span>${k ? (k.ok ? 'зачтено' : 'доработать') : 'пропущен'}</span></button>`; }).join('')}</div>` : ''}</div>`;
+}
+// ───────── отчёт заказчику ─────────
+function viewReport(r) {
+  const b = r.board;
+  return `<div class="report"><div class="card"><span class="brand" style="font-size:18px;padding:0">${brandMark}Встроено</span>
+    <h1>${ty(r.title)}</h1><p class="muted" style="max-width:66ch">${ty(r.company)}</p><p style="font:500 20px/1.35 var(--display);max-width:46ch;margin-top:20px">${ty(r.summary)}</p>
+    <section class="sec"><div class="two"><div>${pyramid(levelValues(r.metrics, b))}</div><div>${r.levels.map(l => `<div class="lv"><div class="chip n${l.n}">${l.n}</div><div><h3>${ty(l.goal)}</h3><dl><dt>Меряем</dt><dd>${ty(l.metric)}</dd><dt>Когда</dt><dd>${ty(l.when)}</dd></dl></div></div>`).join('')}</div></div></section>
+    ${b.rows.length ? `<section class="sec"><h2>Закрепление: день ${b.day} из ${b.total}</h2><div class="kpis"><div class="kpi"><b class="num">${b.pct == null ? '—' : b.pct + '%'}</b><span>заданий выполнено</span></div><div class="kpi"><b class="num">${b.ritm}</b><span>в ритме</span></div><div class="kpi"><b class="num">${b.sag}</b><span>проседают</span></div><div class="kpi"><b class="num" style="color:${b.stop ? 'var(--stop)' : 'inherit'}">${b.stop}</b><span>остановились</span></div></div>${boardRows(null, b, false)}</section>` : ''}
+    ${r.manager.length ? `<section class="sec"><div class="grid2"><div><h2 style="margin-bottom:14px">Что нужно от руководителей участников</h2><ul class="plain">${r.manager.map(x => `<li>${ty(x)}</li>`).join('')}</ul></div><div><h2 style="margin-bottom:14px">День 21</h2><p>${ty(r.final)}</p></div></div></section>` : ''}
+    ${r.demo ? '<p class="muted small" style="margin-top:32px">Демо-пример: компания и цифры условные.</p>' : ''}</div></div>`;
+}
+
+// ───────── загрузка и отрисовка ─────────
+function paint(html) { app.innerHTML = html; }
+async function load(silent) {
+  clearTimeout(S.timer);
+  const r = route();
+  try {
+    if (r[0] === 'p') { S.view = await api(`p/${r[1]}/${r[2]}`); document.title = S.view.title; return paint(viewMember(S.view)); }
+    if (r[0] === 'r') { S.view = await api(`r/${r[1]}`); document.title = S.view.title + ' — результат'; return paint(viewReport(S.view)); }
+    const L = await api('projects'); S.projects = L.projects; S.profile = L.profile;
+    document.title = 'Встроено';
+    if (r[0] === 'new') return paint(viewNew());
+    if (r[0] === 'me') return paint(viewMe());
+    const id = r[0] === 't' ? r[1] : (S.projects[0] || {}).id;
+    if (!id) return paint(viewNew());
+    const p = await api('project/' + id);
+    const changed = JSON.stringify(p) !== JSON.stringify(S.p);
+    S.p = p;
+    if (p.program) U.seen = true;
+    if (!silent || changed) paint(viewProject(p, r[2] || 'scenario'));
+    if (p.stage === 'interview' || p.gen.state === 'running') S.timer = setTimeout(() => load(true), 2000);
+  } catch (e) {
+    paint(`<div class="solo"><div class="card"><h1>Страница не открылась</h1><p class="muted" style="margin:10px 0 16px">${ty(e.message)}</p><a class="btn" href="#/">На главную</a></div></div>`);
+  }
+}
+const rerender = () => { const r = route(); if (r[0] === 'p') paint(viewMember(S.view)); else if (r[0] === 'new') paint(viewNew()); else if (r[0] === 'me') paint(viewMe()); else if (S.p) paint(viewProject(S.p, r[2] || 'scenario')); };
+const val = id => (document.getElementById(id) || {}).value || '';
+async function act(fn) { S.err = ''; S.saved = false; try { await fn(); } catch (e) { S.err = e.message; rerender(); } }
+
+// ───────── голос ─────────
+async function toggleRec(btn) {
+  const target = btn.dataset.target;
+  if (STATIC) { alert(STATIC_MSG); return; }
+  if (U.rec) { U.rec.mr.stop(); return; }
+  if (!navigator.mediaDevices || !window.MediaRecorder) { alert('Этот браузер не умеет записывать звук. Надиктуйте текст с клавиатуры телефона.'); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: true}); }
+  catch { alert('Нет доступа к микрофону. Разрешите его в настройках браузера.'); return; }
+  const mr = new MediaRecorder(stream), chunks = [], t0 = Date.now();
+  U.rec = {mr};
+  btn.classList.add('on');
+  const tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); btn.textContent = `Остановить ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }, 500);
+  btn.textContent = 'Остановить 0:00';
+  mr.ondataavailable = e => chunks.push(e.data);
+  mr.onstop = async () => {
+    clearInterval(tick); stream.getTracks().forEach(t => t.stop()); U.rec = null;
+    btn.classList.remove('on'); btn.disabled = true; btn.textContent = 'Расшифровываю…';
+    try {
+      const r = await fetch('api/voice', {method: 'POST', body: new Blob(chunks, {type: mr.mimeType})});
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      const ta = document.getElementById(target);
+      if (ta) { ta.value = (ta.value.trim() ? ta.value.trim() + ' ' : '') + j.text; ta.dispatchEvent(new Event('input', {bubbles: true})); ta.focus(); }
+    } catch (e) { alert(e.message || 'Не удалось расшифровать запись'); }
+    btn.disabled = false; btn.textContent = 'Наговорить';
+  };
+  mr.start();
+}
+
+// ───────── выгрузка в Word ─────────
+function downloadWord(p) {
+  const e = esc, skill = id => (p.goals.skills.find(s => s.id === id) || {}).name || '';
+  let h = `<h1>${e(p.brief.title)}</h1><p>${e(p.brief.company)}</p><p><b>Замысел.</b> ${e(p.goals.summary)}</p>`;
+  for (const d of p.program.days) {
+    let t = 600; const tm = m => { const s = `${clock(t)}–${clock(t + m)}`; t += m; return s; };
+    h += `<h2>День ${d.day}. ${e(cap(d.theme))}</h2><table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th width="12%">Время</th><th width="14%">Этап</th><th>Что происходит</th></tr>`;
+    h += `<tr><td>${tm(d.open.minutes)}</td><td>Открытие</td><td><b>${e(d.open.title || '')}</b><br>${e(d.open.text)}</td></tr>`;
+    d.blocks.forEach((b, bi) => {
+      h += `<tr><td colspan="3" style="background:#F4F2F7"><b>${e(b.title)}</b> (${b.minutes} мин). ${e(b.goal)}${skill(b.skill) ? ' Навык: ' + e(skill(b.skill)) + '.' : ''}</td></tr>`;
+      for (const s of b.stages) h += `<tr><td>${tm(s.minutes)}</td><td>${STAGE[s.stage].name}<br><small>${STAGE[s.stage].style}</small></td><td><b>${e(s.title)}</b>${s.group ? '<br>' + e(s.group) : ''}${s.theory && s.theory.length ? '<ol>' + s.theory.map(x => `<li>${e(x)}</li>`).join('') + '</ol>' : ''}${s.trainer ? '<br><i>Тренер:</i> ' + e(s.trainer) : ''}${s.materials ? '<br><i>Подготовить:</i> ' + e(s.materials) : ''}</td></tr>`;
+      if (bi < d.blocks.length - 1) h += `<tr><td>${tm(bi === 1 ? 60 : 15)}</td><td colspan="2">${bi === 1 ? 'Обед' : 'Кофе'}</td></tr>`;
+    });
+    h += `<tr><td>${tm(d.close.minutes)}</td><td>Закрытие</td><td><b>${e(d.close.title || '')}</b><br>${e(d.close.text)}</td></tr></table>`;
+  }
+  const doc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial;font-size:11pt}h1{font-size:20pt}h2{font-size:15pt;margin-top:18pt}td,th{vertical-align:top;font-size:10.5pt}</style></head><body>${h}</body></html>`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿', doc], {type: 'application/msword'}));
+  a.download = 'Сценарий — ' + p.brief.title.replace(/[\\/:*?"<>|]/g, '') + '.doc';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ───────── действия ─────────
+const A = {
+  rec: (d, el) => toggleRec(el),
+  create: () => act(async () => { S.draft = val('story'); const r = await api('project', {story: S.draft}); S.draft = ''; U.seen = false; go('/t/' + r.id); }),
+  reinterview: () => act(async () => { await api(`project/${S.p.id}/interview`, {}); load(); }),
+  build: () => act(async () => {
+    const brief = {days: (document.querySelector('input[name=days]:checked') || {}).value || 1, kolb: {}};
+    for (const k of ['title', 'company', 'audience', 'result']) brief[k] = val('b_' + k);
+    for (const k of Object.values(STYLE_KEY)) brief.kolb[k] = +val('k_' + k) || 0;
+    const answers = {}; for (const q of S.p.qa || []) answers[q.id] = val('a_' + q.id);
+    U.seen = false; await api(`project/${S.p.id}/build`, {brief, answers}); window.scrollTo(0, 0); load();
+  }),
+  fix: d => { U.fix = d.section || null; rerender(); const t = document.getElementById('fixtxt'); if (t) t.focus(); },
+  regen: d => act(async () => { await api(`project/${S.p.id}/regen`, {section: d.section, comment: val('fixtxt')}); U.fix = null; load(); }),
+  block: d => { U.block = d.k || null; rerender(); const t = document.getElementById('blktxt'); if (t) t.focus(); },
+  'block-send': d => act(async () => { await api(`project/${S.p.id}/block`, {day: +d.d, block: +d.b, comment: val('blktxt')}); U.block = null; load(); }),
+  word: () => downloadWord(S.p),
+  print: () => window.print(),
+  row: d => { U.row = U.row === d.id ? null : d.id; rerender(); },
+  copy: async (d, el) => { try { await navigator.clipboard.writeText(d.url); } catch { prompt('Скопируйте ссылку', d.url); return; } const t = el.textContent; el.textContent = 'Скопировано'; setTimeout(() => { el.textContent = t; }, 1400); },
+  people: () => act(async () => { S.p = await api(`project/${S.p.id}/people`, {names: val('names')}); rerender(); }),
+  'person-remove': d => act(async () => { if (!confirm('Убрать участника и его отчёты?')) return; S.p = await api(`project/${S.p.id}/person-remove`, {id: d.id}); U.row = null; rerender(); }),
+  start: () => act(async () => { S.p = await api(`project/${S.p.id}/start`, {start: val('start')}); rerender(); }),
+  metrics: () => act(async () => { const m = {}; for (const k of ['reaction', 'test_before', 'test_after', 'metric', 'unit', 'base', 'now', 'target', 'cost', 'benefit']) m[k] = val('m_' + k); S.p = await api(`project/${S.p.id}/metrics`, m); S.saved = true; rerender(); }),
+  delete: () => act(async () => { if (!confirm('Удалить тренинг со сценарием и отчётами?')) return; await api('project/' + S.p.id, undefined, 'DELETE'); S.p = null; go('/'); load(); }),
+  profile: () => act(async () => { S.profile = await api('profile', {name: val('pname'), notes: val('pnotes')}); S.saved = true; rerender(); }),
+  pick: d => { if (route()[0] !== 'p' || +d.d > S.view.day) return; U.pick = +d.d; U.draft = ''; S.err = ''; rerender(); window.scrollTo(0, 0); },
+  checkin: d => act(async () => {
+    const r = route(); U.draft = val('report'); U.sending = true; rerender();
+    try { const j = await api(`p/${r[1]}/${r[2]}/checkin`, {day: +d.d, text: U.draft}); S.view = j.view; U.draft = ''; }
+    finally { U.sending = false; }
+    rerender();
+  }),
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && A[el.dataset.act]) { e.preventDefault(); A[el.dataset.act](el.dataset, el); } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[role=button][data-act]')) e.target.click(); });
+document.addEventListener('input', e => { if (e.target.id === 'story') S.draft = e.target.value; if (e.target.id === 'report') U.draft = e.target.value; });
+window.addEventListener('hashchange', () => { S.err = ''; S.saved = false; U.fix = U.block = U.row = U.pick = null; U.draft = ''; window.scrollTo(0, 0); load(); });
+load();
+</script>
+</body>
+</html>
